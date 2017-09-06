@@ -1,0 +1,39 @@
+{
+  "name": "collapser",
+  "version": "1.0.0",
+  "description": "Collapses tabular result sets into a (hierarchical) object graph based on column nomenclature.",
+  "main": "src/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha test/*.spec.js",
+    "autotest": "./node_modules/.bin/supervisor -q -n exit -x npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lfreneda/collapser.git"
+  },
+  "keywords": [
+    "rows",
+    "recordset",
+    "result",
+    "transformation",
+    "collapse",
+    "object",
+    "orm",
+    "query",
+    "sql"
+  ],
+  "author": "Luiz Freneda <lfreneda@gmail.com> (http://www.freneda.com.br/)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lfreneda/collapser/issues"
+  },
+  "homepage": "https://github.com/lfreneda/collapser#readme",
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "mocha": "^3.5.0",
+    "supervisor": "^0.12.0"
+  }
+}
