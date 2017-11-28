@@ -16,7 +16,9 @@ describe('lib/collapse', function () {
                 {'this.id': 1, 'this.val': 'p1', 'this.children[].id': 11, 'this.children[].val': 'c1'},
                 {'this.id': 1, 'this.val': 'p1', 'this.children[].id': 12, 'this.children[].val': 'c2'}
             ];
+
             var result = collapse(rows);
+
             var expectedResult = [{id: 1, val: 'p1', children: [{id: 11, val: 'c1'}, {id: 12, val: 'c2'}]}];
             assert.deepEqual(result, expectedResult);
         });
@@ -423,5 +425,5 @@ describe('lib/collapse', function () {
             assert.deepEqual(result, expectedResult);
         });
 
-    });
+   });
 });
