@@ -18,7 +18,7 @@ if (!String.prototype.endsWith) {
 function schemaByConvention(row) {
     
     var parent = 'this';
-    var schemata = Object.keys(row).reduce(function (acc, c) {
+    var schema = Object.keys(row).reduce(function (acc, c) {
     
         var tuple = c.split('.');
         var entity = acc;
@@ -26,7 +26,7 @@ function schemaByConvention(row) {
     
         do {
             name = tuple.shift();
-            var isArray =  (name.indexOf('[]') !== -1)
+            var isArray =  (name.indexOf('[]') !== -1);
             name = name.replace('[]', '');
     
             if (name !== parent) {
@@ -39,13 +39,13 @@ function schemaByConvention(row) {
             }
         } while (tuple.length > 1);	// walk as deep as we need to for child__grandchild__greatgrandchild__fieldname etc
         
-        if (c.endsWith('id')) { entity.pk = c; }
+        if (c.endsWith('.id')) { entity.pk = c; }
         entity.columns[c] = tuple.pop(); // set {fieldname: path__to__fieldname} pair
         return acc;
     
     }, { pk: 'this.id', columns: {} });
     
-    return schemata;
+    return schema;
 }
 
 /**

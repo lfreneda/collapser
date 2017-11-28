@@ -5,7 +5,7 @@ var collapse = require('./../src/index');
 
 describe('lib/collapse', function () {
 
-    describe('lib/collapse original tests cases', function() {
+    describe('lib/collapse original tests cases', function () {
 
         it('should return empty if given empty', function () {
             assert.deepEqual([], collapse([]));
@@ -38,9 +38,30 @@ describe('lib/collapse', function () {
         it('should collapse multiple children with the same parent', function () {
 
             var rows = [
-                {'this.id': 1, 'this.val': 'p1', 'this.children1[].id': 11, 'this.children1[].val': 'c1', 'this.children2[].id': 21, 'this.children2[].val': 'd1'},
-                {'this.id': 1, 'this.val': 'p1', 'this.children1[].id': 12, 'this.children1[].val': 'c2', 'this.children2[].id': 22, 'this.children2[].val': 'd2'},
-                {'this.id': 1, 'this.val': 'p1', 'this.children1[].id': 12, 'this.children1[].val': 'c2', 'this.children2[].id': 23, 'this.children2[].val': 'd3'}
+                {
+                    'this.id': 1,
+                    'this.val': 'p1',
+                    'this.children1[].id': 11,
+                    'this.children1[].val': 'c1',
+                    'this.children2[].id': 21,
+                    'this.children2[].val': 'd1'
+                },
+                {
+                    'this.id': 1,
+                    'this.val': 'p1',
+                    'this.children1[].id': 12,
+                    'this.children1[].val': 'c2',
+                    'this.children2[].id': 22,
+                    'this.children2[].val': 'd2'
+                },
+                {
+                    'this.id': 1,
+                    'this.val': 'p1',
+                    'this.children1[].id': 12,
+                    'this.children1[].val': 'c2',
+                    'this.children2[].id': 23,
+                    'this.children2[].val': 'd3'
+                }
             ];
 
             var result = collapse(rows);
@@ -57,9 +78,30 @@ describe('lib/collapse', function () {
         it('should collapse children into other children', function () {
 
             var rows = [
-                {'this.id': 1, 'this.val': 'p1', 'this.children1[].id': 11, 'this.children1[].val': 'c1', 'this.children1[].children2[].id': 21, 'this.children1[].children2[].val': 'd1'},
-                {'this.id': 1, 'this.val': 'p1', 'this.children1[].id': 12, 'this.children1[].val': 'c2', 'this.children1[].children2[].id': 22, 'this.children1[].children2[].val': 'd2'},
-                {'this.id': 1, 'this.val': 'p1', 'this.children1[].id': 12, 'this.children1[].val': 'c2', 'this.children1[].children2[].id': 23, 'this.children1[].children2[].val': 'd3'}
+                {
+                    'this.id': 1,
+                    'this.val': 'p1',
+                    'this.children1[].id': 11,
+                    'this.children1[].val': 'c1',
+                    'this.children1[].children2[].id': 21,
+                    'this.children1[].children2[].val': 'd1'
+                },
+                {
+                    'this.id': 1,
+                    'this.val': 'p1',
+                    'this.children1[].id': 12,
+                    'this.children1[].val': 'c2',
+                    'this.children1[].children2[].id': 22,
+                    'this.children1[].children2[].val': 'd2'
+                },
+                {
+                    'this.id': 1,
+                    'this.val': 'p1',
+                    'this.children1[].id': 12,
+                    'this.children1[].val': 'c2',
+                    'this.children1[].children2[].id': 23,
+                    'this.children1[].children2[].val': 'd3'
+                }
             ];
 
             var result = collapse(rows);
@@ -124,8 +166,18 @@ describe('lib/collapse', function () {
             // but it's more legible than reproducing the 'multiple children' data and tests the deduplication just the same
             var rows = [
                 {'this.id': 1, 'this.val': 'p1', 'this.children[].id': 11, 'this.children[].val': 'c1'},
-                {'this.id': 1, 'this.val': 'p1', 'this.children[].id': 12, 'this.children[].val': 'c2'}, /* <---- duplicated row */
-                {'this.id': 1, 'this.val': 'p1', 'this.children[].id': 12, 'this.children[].val': 'c2'}  /* <---- duplicated row */
+                {
+                    'this.id': 1,
+                    'this.val': 'p1',
+                    'this.children[].id': 12,
+                    'this.children[].val': 'c2'
+                }, /* <---- duplicated row */
+                {
+                    'this.id': 1,
+                    'this.val': 'p1',
+                    'this.children[].id': 12,
+                    'this.children[].val': 'c2'
+                }  /* <---- duplicated row */
             ];
 
             var result = collapse(rows);
@@ -133,7 +185,7 @@ describe('lib/collapse', function () {
             assert.deepEqual(result, expectedResult);
         });
 
-        it('should apply new parents only in the correct scope', function() {
+        it('should apply new parents only in the correct scope', function () {
 
             var rows = [
 
@@ -228,7 +280,7 @@ describe('lib/collapse', function () {
 
     });
 
-    describe('real life scenarios', function() {
+    describe('real life scenarios', function () {
 
         it('should collapse two tasks', function () {
             var rows = [
@@ -262,19 +314,51 @@ describe('lib/collapse', function () {
         it('should collapse two tasks with customers and its address', function () {
 
             var rows = [
-                {'this.id': 1, 'this.todo': 'do task 1', 'this.customer.id': 3, 'this.customer.name': 'Luiz', 'this.customer.address.street': 'Rua dos Pinheiros 383', 'this.customer.address.coords.latitude': -1, 'this.customer.address.coords.longitude': -2 },
-                {'this.id': 2, 'this.todo': 'do task 2', 'this.customer.id': 4, 'this.customer.name': 'Felipe', 'this.customer.address.street': 'Avenida Rebouças 130', 'this.customer.address.coords.latitude': -3, 'this.customer.address.coords.longitude': -5 }
+                {
+                    'this.id': 1,
+                    'this.todo': 'do task 1',
+                    'this.customer.id': 3,
+                    'this.customer.name': 'Luiz',
+                    'this.customer.address.street': 'Rua dos Pinheiros 383',
+                    'this.customer.address.coords.latitude': -1,
+                    'this.customer.address.coords.longitude': -2
+                },
+                {
+                    'this.id': 2,
+                    'this.todo': 'do task 2',
+                    'this.customer.id': 4,
+                    'this.customer.name': 'Felipe',
+                    'this.customer.address.street': 'Avenida Rebouças 130',
+                    'this.customer.address.coords.latitude': -3,
+                    'this.customer.address.coords.longitude': -5
+                }
             ];
 
             var result = collapse(rows);
             var expectedResult = [
-                {id: 1, todo: 'do task 1', customer: {id: 3, name: 'Luiz', address: { street: 'Rua dos Pinheiros 383', coords: { latitude: -1, longitude: -2 }}}},
-                {id: 2, todo: 'do task 2', customer: {id: 4, name: 'Felipe', address: { street: 'Avenida Rebouças 130', coords: { latitude: -3, longitude: -5 }}}}
+                {
+                    id: 1,
+                    todo: 'do task 1',
+                    customer: {
+                        id: 3,
+                        name: 'Luiz',
+                        address: {street: 'Rua dos Pinheiros 383', coords: {latitude: -1, longitude: -2}}
+                    }
+                },
+                {
+                    id: 2,
+                    todo: 'do task 2',
+                    customer: {
+                        id: 4,
+                        name: 'Felipe',
+                        address: {street: 'Avenida Rebouças 130', coords: {latitude: -3, longitude: -5}}
+                    }
+                }
             ];
             assert.deepEqual(result, expectedResult);
         });
 
-        it('should collapse a complete customer with address and labels', function() {
+        it('should collapse a complete customer with address and labels', function () {
 
             var rows = [
                 {
@@ -369,7 +453,7 @@ describe('lib/collapse', function () {
             assert.deepEqual(result, expectedResult);
         });
 
-        it('should collapse a complete form with questions and options', function(){
+        it('should collapse a complete form with questions and options', function () {
             var rows = [
                 {
                     "this.id": "528ad1ca-c889-46f0-b044-689e0986dab2",
@@ -425,5 +509,128 @@ describe('lib/collapse', function () {
             assert.deepEqual(result, expectedResult);
         });
 
-   });
+        it('should collapse tasks with orders, customers, address and more relationships', function () {
+
+            var rows = [
+                {
+                    "this.id": "286c1265-e4e3-46b6-8a98-c96d234f1df4",
+                    "this._id": 18,
+                    "this.startedAt": null,
+                    "this.completedAt": null,
+                    "this.status": 0,
+                    "this.statusDescription": null,
+                    "this.sharedLocationToken": null,
+                    "this.description": null,
+                    "this.duration": 60,
+                    "this.archived": false,
+                    "this.position": 1,
+                    "this.account.id": 1,
+                    "this.order.id": "d7089ad9-5386-4beb-aff2-66509130e56f",
+                    "this.employee.id": 4,
+                    "this.rating.id": null,
+                    "this.scheduling.type": 0,
+                    "this.scheduling.date": null,
+                    "this.scheduling.time": null,
+                    "this.coords.id": "286c1265-e4e3-46b6-8a98-c96d234f1df4",
+                    "this.coords.latitude": "-23.573005",
+                    "this.coords.longitude": "-46.695866",
+                    "this.metadata.createdAt": "2017-11-28T14:42:42.158Z",
+                    "this.order._id": null,
+                    "this.order.identifier": "order-with-service-2",
+                    "this.order.description": null,
+                    "this.order.customer.id": 3,
+                    "this.order.service.id": 2,
+                    "this.order.address.zipCode": "15085480",
+                    "this.order.address.street": "Rua dos Pinheiros",
+                    "this.order.address.number": "383",
+                    "this.order.address.complement": null,
+                    "this.order.address.neighborhood": null,
+                    "this.order.address.city": "Sao paulo",
+                    "this.order.address.state": "SP",
+                    "this.order.address.coords.latitude": "-23.573005",
+                    "this.order.address.coords.longitude": "-46.695866",
+                    "this.order.deadlineAt": null,
+                    "this.order.archived": false,
+                    "this.order.signature.path": null,
+                    "this.order.signature.signedAt": null,
+                    "this.order.signature.signedBy": null,
+                    "this.order.form.id": null
+                }
+            ];
+
+            var result = collapse(rows);
+
+            var expectedResult = [
+                {
+                    "id": "286c1265-e4e3-46b6-8a98-c96d234f1df4",
+                    "_id": 18,
+                    "startedAt": null,
+                    "completedAt": null,
+                    "status": 0,
+                    "statusDescription": null,
+                    "sharedLocationToken": null,
+                    "description": null,
+                    "duration": 60,
+                    "archived": false,
+                    "position": 1,
+                    "account": {
+                        "id": 1
+                    },
+                    "order": {
+                        "id": "d7089ad9-5386-4beb-aff2-66509130e56f",
+                        "_id": null,
+                        "identifier": "order-with-service-2",
+                        "description": null,
+                        "deadlineAt": null,
+                        "archived": false,
+                        "customer": {
+                            "id": 3
+                        },
+                        "service": {
+                            "id": 2
+                        },
+                        "address": {
+                            "zipCode": "15085480",
+                            "street": "Rua dos Pinheiros",
+                            "number": "383",
+                            "complement": null,
+                            "neighborhood": null,
+                            "city": "Sao paulo",
+                            "state": "SP",
+                            "coords": {
+                                "latitude": "-23.573005",
+                                "longitude": "-46.695866"
+                            }
+                        },
+                        "signature": {
+                            "path": null,
+                            "signedAt": null,
+                            "signedBy": null
+                        },
+                        "form": null
+                    },
+                    "employee": {
+                        "id": 4
+                    },
+                    "rating": null,
+                    "scheduling": {
+                        "type": 0,
+                        "date": null,
+                        "time": null
+                    },
+                    "coords": {
+                        "id": "286c1265-e4e3-46b6-8a98-c96d234f1df4",
+                        "latitude": "-23.573005",
+                        "longitude": "-46.695866"
+                    },
+                    "metadata": {
+                        "createdAt": "2017-11-28T14:42:42.158Z"
+                    }
+                }
+            ];
+
+            assert.deepEqual(result, expectedResult);
+        });
+
+    });
 });
