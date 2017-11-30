@@ -18,7 +18,7 @@ if (!String.prototype.endsWith) {
 function schemaByConvention(row) {
     
     var parent = 'this';
-    var schema = Object.keys(row).reduce(function (acc, c) {
+    return Object.keys(row).reduce(function (acc, c) {
     
         var tuple = c.split('.');
         var entity = acc;
@@ -44,8 +44,73 @@ function schemaByConvention(row) {
         return acc;
     
     }, { pk: 'this.id', columns: {} });
-    
-    return schema;
+}
+
+
+function transform (objSchema, map, output) {
+
+    // for every id:entity pair in the current level of mapping, if the schema
+    // defines any dependent entities recurse and transform them, then push the
+    // current object into the output and return
+    return Object.keys(map).reduce(function (acc, id) {
+
+        Object.keys(objSchema).filter(c => {
+            return c !== 'columns' && typeof objSchema[c] === 'object';  // just structure now
+        })
+        .forEach(function (node) {
+            // we have to init & pass the accumulator into the *next* recursion
+            // since the single option is defined on the child rather than the
+            // parent
+            const accumulator = objSchema[node] && objSchema[node].array ? [] : {};
+
+            if (map[id][node]) {
+                map[id][node] = transform(objSchema[node], map[id][node], accumulator);
+            }
+        });
+
+        if (Array.isArray(output)) {
+            acc.push(map[id]);
+        } else {
+            acc = map[id];
+        }
+
+        return acc;
+    }, []);
+}
+
+function build(obj, objSchema, row) {
+
+    var id = row[objSchema.pk];
+
+    if (id === null) { // null id means this entity doesn't exist (eg outer join)
+        return null;
+    } else if (!obj.hasOwnProperty(id)) { // this entity is new
+        obj[id] = {};
+    }
+
+    var mapper = _.isArray(objSchema.columns) ? val => obj[id][val] = row[val] : (val, key) => obj[id][val] = row[key];
+    // columns is just a list of field names
+    // the columns object maps field names in the row to object key names
+
+    _.map(objSchema.columns, mapper);
+
+    Object.keys(objSchema).forEach(function (c) {
+        switch (c) {
+            case 'pk': case 'columns': case 'array': break;
+            default: {
+                const descendant = build(obj[id][c] || {}, objSchema[c], row);
+                if (descendant || !objSchema[c].array) {
+                    obj[id][c] = descendant;
+                } else if (objSchema[c].array) { // we always want an array if there could be multiple descendants
+                    obj[id][c] = [];
+                }
+
+                break;
+            }
+        }
+    });
+
+    return obj;
 }
 
 /**
@@ -73,6 +138,7 @@ function schemaByConvention(row) {
  * to each data element in turn.
  */
 exports = module.exports = function (data) {
+
   if (!data || data.length === 0) {
     return [];
   }
@@ -86,50 +152,8 @@ exports = module.exports = function (data) {
 
    * Output: {1: {id: 1, name: 'hi', children: {111: {id: 111, name: 'ih'}}}
    */
-  const mapping = data.reduce(function (acc, row) {
-    return (function build (obj, objSchema) {
-      const id = row[objSchema.pk];
-
-      if (id === null) {
-        // null id means this entity doesn't exist (eg outer join)
-        return null;
-      } else if (!obj.hasOwnProperty(id)) {
-        // this entity is new
-        obj[id] = {};
-      } 
-
-      let mapper;
-
-      if (_.isArray(objSchema.columns)) {
-        // columns is just a list of field names
-        mapper = val => obj[id][val] = row[val];
-      } else {
-        // the columns object maps field names in the row to object key names
-        mapper = (val, key) => obj[id][val] = row[key];
-      }
-
-      _.map(objSchema.columns, mapper);
-
-      Object.keys(objSchema).forEach(function (c) {
-        switch (c) {
-          case 'pk': case 'columns': case 'array': break;
-          default: {
-            const descendant = build(obj[id][c] || {}, objSchema[c]);
-
-            if (descendant || !objSchema[c].array) {
-              obj[id][c] = descendant;
-            } else if (objSchema[c].array) {
-              // we always want an array if there could be multiple descendants
-              obj[id][c] = [];
-            }
-
-            break;
-          }
-        }
-      });
-
-      return obj;
-    })(acc, schema);
+  var mapping = data.reduce(function (acc, row) {
+    return build(acc, schema, row);
   }, {});
 
   /* Build the final graph. The structure and data already exists in mapping,
@@ -137,33 +161,5 @@ exports = module.exports = function (data) {
    * entities (or flat objects if required).
    *
    * Output: [{id: 1, name: 'hi', children: [{id: 111, name: 'ih'}]}] */
-  return (function transform (objSchema, map, output) {
-    // for every id:entity pair in the current level of mapping, if the schema
-    // defines any dependent entities recurse and transform them, then push the
-    // current object into the output and return
-    return Object.keys(map).reduce(function (acc, id) {
-      Object.keys(objSchema)
-        .filter(c => {
-          return c !== 'columns' && typeof objSchema[c] === 'object';  // just structure now
-        })
-        .forEach(function (node) {
-          // we have to init & pass the accumulator into the *next* recursion
-          // since the single option is defined on the child rather than the
-          // parent
-          const accumulator = objSchema[node] && objSchema[node].array ? [] : {};
-
-          if (map[id][node]) {
-            map[id][node] = transform(objSchema[node], map[id][node], accumulator);
-          }
-        });
-
-      if (Array.isArray(output)) {
-        acc.push(map[id]);
-      } else {
-        acc = map[id];
-      }
-
-      return acc;
-    }, []);
-  })(schema, mapping, []);
+  return transform(schema, mapping, []);
 };
